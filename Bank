@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiktives Banking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .hidden {
+            display: none;
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="login-container">
+        <h2>Registrierung / Anmeldung</h2>
+        <input type="text" id="username" placeholder="Benutzername">
+        <input type="password" id="password" placeholder="Passwort">
+        <button onclick="register()">Registrieren</button>
+        <button onclick="login()">Anmelden</button>
+    </div>
+
+    <div class="container hidden" id="banking-container">
+        <h2>Willkommen, <span id="display-username"></span></h2>
+        <p>Kontostand: <span id="balance">1000</span> Kripto</p>
+        <h3>Geld überweisen</h3>
+        <input type="text" id="recipient" placeholder="Empfänger">
+        <input type="number" id="amount" placeholder="Betrag">
+        <button onclick="transfer()">Überweisen</button>
+    </div>
+
+    <script>
+        const users = JSON.parse(localStorage.getItem('users')) || {};
+        let currentUser = null;
+
+        function saveUsers() {
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
+        function register() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username && password && !users[username]) {
+                users[username] = { password, balance: 1000 };
+                saveUsers();
+                alert('Registrierung erfolgreich');
+            } else {
+                alert('Registrierung fehlgeschlagen oder Benutzername existiert bereits');
+            }
+        }
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (users[username] && users[username].password === password) {
+                currentUser = username;
+                document.getElementById('display-username').innerText = username;
+                document.getElementById('balance').innerText = users[username].balance;
+                document.getElementById('login-container').classList.add('hidden');
+                document.getElementById('banking-container').classList.remove('hidden');
+            } else {
+                alert('Anmeldung fehlgeschlagen');
+            }
+        }
+
+        function transfer() {
+            const recipient = document.getElementById('recipient').value;
+            const amount = parseInt(document.getElementById('amount').value);
+
+            if (users[recipient] && amount > 0 && users[currentUser].balance >= amount) {
+                users[currentUser].balance -= amount;
+                users[recipient].balance += amount;
+                saveUsers();
+                document.getElementById('balance').innerText = users[currentUser].balance;
+                alert('Überweisung erfolgreich');
+            } else {
+                alert('Überweisung fehlgeschlagen');
+            }
+        }
+    </script>
+</body>
+</html>
